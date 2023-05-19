@@ -4,7 +4,7 @@ const { STATUS_CODES } = require('../utils/constants');
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(STATUS_CODES.OK).send({ users }))
-    .catch(() => res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Произошла ошибка сервера' }));
+    .catch(() => res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' }));
 };
 
 const createUser = (req, res) => {
@@ -16,7 +16,7 @@ const createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные при создании пользователя' });
       } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
+        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -34,7 +34,7 @@ const getUserById = (req, res) => {
       if (err.name === 'CastError') {
         res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные поиска' });
       } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
+        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -54,7 +54,7 @@ const updateUserProfile = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные при обновлении профиля' });
       } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
+        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -74,7 +74,7 @@ const updateUserAvatar = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные при обновлении аватара' });
       } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
+        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };

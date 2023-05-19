@@ -5,11 +5,11 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { STATUS_CODES } = require('./utils/constants');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, MONGO_URL = 'mongodb://127.0.0.1/mestodb' } = process.env;
 
 const app = express();
 
-mongoose.connect('mongodb://127.0.0.1/mestodb')
+mongoose.connect(MONGO_URL)
   .then(() => console.log('База данных подключена'))
   .catch((err) => console.log('Ошибка подключения к БД', err));
 
