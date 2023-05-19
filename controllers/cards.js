@@ -13,7 +13,7 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
 
   return Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(STATUS_CODES.CREATED).send(card))
+    .then((card) => res.status(STATUS_CODES.CREATED).send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные при создании карточки' });
@@ -24,16 +24,16 @@ const createCard = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      if (card) {
-        res.status(STATUS_CODES.OK).send(card);
-      } else {
+      if (!card) {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Карточка не найдена' });
+        return;
       }
+      res.status(STATUS_CODES.OK).send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
@@ -48,14 +48,14 @@ const likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
-      if (card) {
-        res.status(STATUS_CODES.OK).send(card);
-      } else {
+      if (!card) {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Карточка не найдена' });
+        return;
       }
+      res.status(STATUS_CODES.OK).send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });
@@ -70,14 +70,14 @@ const dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
-      if (card) {
-        res.status(STATUS_CODES.OK).send(card);
-      } else {
+      if (!card) {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Карточка не найдена' });
+        return;
       }
+      res.status(STATUS_CODES.OK).send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Произошла ошибка сервера' });

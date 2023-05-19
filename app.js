@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const { STATUS_CODES } = require('./utils/constants');
 
 const { PORT = 3000 } = process.env;
 
@@ -26,6 +27,10 @@ app.use((req, res, next) => {
 
 app.use('/', userRouter);
 app.use('/', cardRouter);
+
+app.all('/*', (req, res) => {
+  res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Страница не существует' });
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
