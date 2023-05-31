@@ -1,5 +1,11 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { STATUS_CODES } = require('../utils/constants');
+const BadRequestError = require('../utils/errors/BadRequestError');
+const ConflictError = require('../utils/errors/ConflictError');
+const InternalServerError = require('../utils/errors/InternalServerError');
+const UnauthorizedError = require('../utils/errors/UnauthorizedError');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -7,17 +13,45 @@ const getUsers = (req, res) => {
     .catch(() => res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' }));
 };
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-
-  User.create({ name, about, avatar })
+const createUser = (req, res, next) => {
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => res.status(STATUS_CODES.CREATED).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные при создании пользователя' });
+        next(new BadRequestError('Введены некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Пользователь с такой почтой уже существует'));
       } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('Произошла ошибка сервера'));
       }
+    });
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({ _id: token });
+    })
+    .catch(() => {
+      next(new UnauthorizedError('Неверный логин или пароль'));
     });
 };
 
@@ -82,6 +116,7 @@ const updateUserAvatar = (req, res) => {
 module.exports = {
   getUsers,
   createUser,
+  login,
   getUserById,
   updateUserProfile,
   updateUserAvatar,
