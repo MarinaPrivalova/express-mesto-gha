@@ -6,11 +6,14 @@ const BadRequestError = require('../utils/errors/BadRequestError');
 const ConflictError = require('../utils/errors/ConflictError');
 const InternalServerError = require('../utils/errors/InternalServerError');
 const UnauthorizedError = require('../utils/errors/UnauthorizedError');
+const NotFoundError = require('../utils/errors/NotFoundError');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(STATUS_CODES.OK).send({ users }))
-    .catch(() => res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' }));
+    .catch(() => {
+      next(new InternalServerError('Произошла ошибка сервера'));
+    });
 };
 
 const createUser = (req, res, next) => {
@@ -55,25 +58,43 @@ const login = (req, res, next) => {
     });
 };
 
-const getUserById = (req, res) => {
+const findCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (user) {
+        res.send({ data: user });
+      } else {
+        next(new NotFoundError('Пользователь не найден'));
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Введены некорректные данные поиска'));
+      } else {
+        next(new InternalServerError('Произошла ошибка сервера'));
+      }
+    });
+};
+
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user) {
         res.status(STATUS_CODES.OK).send({ data: user });
       } else {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь не найден' });
+        next(new NotFoundError('Пользователь не найден'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные поиска' });
+        next(new BadRequestError('Введены некорректные данные поиска'));
       } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
     });
 };
 
-const updateUserProfile = (req, res) => {
+const updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   return User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
@@ -81,19 +102,19 @@ const updateUserProfile = (req, res) => {
       if (user) {
         res.status(STATUS_CODES.OK).send(user);
       } else {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь не найден' });
+        next(new NotFoundError('Пользователь не найден'));
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные при обновлении профиля' });
+        next(new BadRequestError('Введены некорректные данные при обновлении профиля'));
       } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
     });
 };
 
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   return User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
@@ -101,14 +122,14 @@ const updateUserAvatar = (req, res) => {
       if (user) {
         res.status(STATUS_CODES.OK).send(user);
       } else {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь не найден' });
+        next(new NotFoundError('Пользователь не найден'));
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(STATUS_CODES.BAD_REQUEST).send({ message: 'Введены некорректные данные при обновлении аватара' });
+        next(new BadRequestError('Введены некорректные данные при обновлении аватара'));
       } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
     });
 };
@@ -117,6 +138,7 @@ module.exports = {
   getUsers,
   createUser,
   login,
+  findCurrentUser,
   getUserById,
   updateUserProfile,
   updateUserAvatar,
