@@ -68,11 +68,10 @@ const login = (req, res, next) => {
 const findCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      if (user) {
-        res.send({ data: user });
-      } else {
-        next(new NotFoundError('Пользователь не найден'));
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
       }
+      res.status(STATUS_CODES.OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -86,11 +85,10 @@ const findCurrentUser = (req, res, next) => {
 const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
-      if (user) {
-        res.status(STATUS_CODES.OK).send({ data: user });
-      } else {
-        next(new NotFoundError('Пользователь не найден'));
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
       }
+      res.status(STATUS_CODES.OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -106,11 +104,10 @@ const updateUserProfile = (req, res, next) => {
 
   return User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
-      if (user) {
-        res.status(STATUS_CODES.OK).send(user);
-      } else {
-        next(new NotFoundError('Пользователь не найден'));
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
       }
+      res.status(STATUS_CODES.OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -126,11 +123,10 @@ const updateUserAvatar = (req, res, next) => {
 
   return User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
-      if (user) {
-        res.status(STATUS_CODES.OK).send(user);
-      } else {
-        next(new NotFoundError('Пользователь не найден'));
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
       }
+      res.status(STATUS_CODES.OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
