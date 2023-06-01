@@ -1,16 +1,13 @@
 const Card = require('../models/card');
 const { STATUS_CODES } = require('../utils/constants');
 const BadRequestError = require('../utils/errors/BadRequestError');
-const InternalServerError = require('../utils/errors/InternalServerError');
 const NotFoundError = require('../utils/errors/NotFoundError');
 const ForbiddenError = require('../utils/errors/ForbiddenError');
 
 const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(STATUS_CODES.OK).send({ cards }))
-    .catch(() => {
-      next(new InternalServerError('Произошла ошибка сервера'));
-    });
+    .catch(next);
 };
 
 const createCard = (req, res, next) => {
@@ -22,7 +19,7 @@ const createCard = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Введены некорректные данные'));
       } else {
-        next(new InternalServerError('На сервере произошла ошибка'));
+        next(err);
       }
     });
 };
@@ -42,7 +39,7 @@ const deleteCard = (req, res, next) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные'));
       } else {
-        next(new InternalServerError('Произошла ошибка удаление карточки с сервера'));
+        next(err);
       }
     });
 };
@@ -63,7 +60,7 @@ const likeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные'));
       } else {
-        next(new InternalServerError('На сервере произошла ошибка'));
+        next(err);
       }
     });
 };
@@ -84,7 +81,7 @@ const dislikeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные'));
       } else {
-        next(new InternalServerError('На сервере произошла ошибка'));
+        next(err);
       }
     });
 };

@@ -4,16 +4,13 @@ const User = require('../models/user');
 const { STATUS_CODES } = require('../utils/constants');
 const BadRequestError = require('../utils/errors/BadRequestError');
 const ConflictError = require('../utils/errors/ConflictError');
-const InternalServerError = require('../utils/errors/InternalServerError');
 const UnauthorizedError = require('../utils/errors/UnauthorizedError');
 const NotFoundError = require('../utils/errors/NotFoundError');
 
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(STATUS_CODES.OK).send({ users }))
-    .catch(() => {
-      next(new InternalServerError('Произошла ошибка сервера'));
-    });
+    .catch(next);
 };
 
 const createUser = (req, res, next) => {
@@ -40,7 +37,7 @@ const createUser = (req, res, next) => {
       } else if (err.code === 11000) {
         next(new ConflictError('Пользователь с такой почтой уже существует'));
       } else {
-        next(new InternalServerError('Произошла ошибка сервера'));
+        next(err);
       }
     });
 };
@@ -71,7 +68,7 @@ const findCurrentUser = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные поиска'));
       } else {
-        next(new InternalServerError('Произошла ошибка сервера'));
+        next(err);
       }
     });
 };
@@ -89,7 +86,7 @@ const getUserById = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные поиска'));
       } else {
-        next(new InternalServerError('На сервере произошла ошибка'));
+        next(err);
       }
     });
 };
@@ -109,7 +106,7 @@ const updateUserProfile = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Введены некорректные данные при обновлении профиля'));
       } else {
-        next(new InternalServerError('На сервере произошла ошибка'));
+        next(err);
       }
     });
 };
@@ -129,7 +126,7 @@ const updateUserAvatar = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Введены некорректные данные при обновлении аватара'));
       } else {
-        next(new InternalServerError('На сервере произошла ошибка'));
+        next(err);
       }
     });
 };
