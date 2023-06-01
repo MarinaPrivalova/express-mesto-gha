@@ -42,7 +42,7 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.all('/*', (req, res, next) => {
+app.all('*', (req, res, next) => {
   next(new NotFoundError('Страница не существует'));
 });
 
