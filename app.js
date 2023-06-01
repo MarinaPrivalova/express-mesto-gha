@@ -1,11 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
-const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { createUser, login } = require('./controllers/users');
+const { signinValidator, signupValidator } = require('./middlewares/validation');
 const NotFoundError = require('./utils/errors/NotFoundError');
 
 const { PORT = 3000, MONGO_URL = 'mongodb://127.0.0.1/mestodb' } = process.env;
@@ -21,8 +22,8 @@ mongoose.set({ runValidators: true });
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', signinValidator, login);
+app.post('/signup', signupValidator, createUser);
 
 app.use(auth);
 app.use('/', userRouter);
@@ -41,9 +42,7 @@ app.use((err, req, res, next) => {
   } = err;
   res.status(statusCode)
     .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
+      message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
     });
   next();
 });
