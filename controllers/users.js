@@ -104,7 +104,7 @@ const getUserById = (req, res, next) => {
 const updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
 
-  return User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  return User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         res.status(STATUS_CODES.OK).send(user);
@@ -124,7 +124,7 @@ const updateUserProfile = (req, res, next) => {
 const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
-  return User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+  return User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         res.status(STATUS_CODES.OK).send(user);

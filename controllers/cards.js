@@ -28,7 +28,7 @@ const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
+        throw new NotFoundError('Карточка не найдена');
       }
       if (card.owner.toString() !== req.user._id) {
         next(new ForbiddenError('Нет прав на удаление карточки'));
@@ -52,7 +52,7 @@ const likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
+        throw new NotFoundError('Карточка не найдена');
       }
       res.status(STATUS_CODES.OK).send({ data: card });
     })
@@ -73,7 +73,7 @@ const dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
+        throw new NotFoundError('Карточка не найдена');
       }
       res.status(STATUS_CODES.OK).send({ data: card });
     })

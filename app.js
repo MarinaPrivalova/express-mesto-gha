@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
+const bodyParser = require('body-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
@@ -29,12 +29,7 @@ app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardRouter);
 
-app.all('/*', (req, res, next) => {
-  next(new NotFoundError('Страница не существует'));
-});
-
 app.use(errors());
-
 app.use((err, req, res, next) => {
   const {
     statusCode = 500,
@@ -45,6 +40,10 @@ app.use((err, req, res, next) => {
       message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
     });
   next();
+});
+
+app.all('/*', (req, res, next) => {
+  next(new NotFoundError('Страница не существует'));
 });
 
 app.listen(PORT, () => {
