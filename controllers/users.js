@@ -5,6 +5,7 @@ const { STATUS_CODES } = require('../utils/constants');
 const BadRequestError = require('../utils/errors/BadRequestError');
 const ConflictError = require('../utils/errors/ConflictError');
 const NotFoundError = require('../utils/errors/NotFoundError');
+const UnauthorizedError = require('../utils/errors/UnauthorizedError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -59,7 +60,9 @@ const login = (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ _id: token });
     })
-    .catch((next));
+    .catch(() => {
+      next(new UnauthorizedError('Неверный логин или пароль'));
+    });
 };
 
 const findCurrentUser = (req, res, next) => {
