@@ -73,13 +73,7 @@ const findCurrentUser = (req, res, next) => {
       }
       res.status(STATUS_CODES.OK).send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Введены некорректные данные поиска'));
-      } else {
-        next(err);
-      }
-    });
+    .catch((next));
 };
 
 const getUserById = (req, res, next) => {

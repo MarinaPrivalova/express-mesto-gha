@@ -29,6 +29,10 @@ app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardRouter);
 
+app.all('/*', (req, res, next) => {
+  next(new NotFoundError('Страница не существует'));
+});
+
 app.use(errors());
 app.use((err, req, res, next) => {
   const {
@@ -40,10 +44,6 @@ app.use((err, req, res, next) => {
       message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
     });
   next();
-});
-
-app.all('/*', (req, res, next) => {
-  next(new NotFoundError('Страница не существует'));
 });
 
 app.listen(PORT, () => {
