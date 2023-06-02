@@ -17,10 +17,9 @@ const createCard = (req, res, next) => {
     .then((card) => res.status(STATUS_CODES.CREATED).send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Введены некорректные данные'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Введены некорректные данные'));
       }
+      return next(err);
     });
 };
 
@@ -31,16 +30,15 @@ const deleteCard = (req, res, next) => {
         throw new NotFoundError('Карточка не найдена');
       }
       if (card.owner.toString() !== req.user._id) {
-        next(new ForbiddenError('Нет прав на удаление карточки'));
+        throw new ForbiddenError('Нет прав на удаление карточки');
       }
       Card.findByIdAndRemove(req.params.cardId).then(() => res.send({ message: 'Карточка удалена' })).catch(next);
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError('Введены некорректные данные'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Введены некорректные данные'));
       }
+      return next(err);
     });
 };
 
@@ -58,10 +56,9 @@ const likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Введены некорректные данные'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Введены некорректные данные'));
       }
+      return next(err);
     });
 };
 
@@ -79,10 +76,9 @@ const dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Введены некорректные данные'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Введены некорректные данные'));
       }
+      return next(err);
     });
 };
 

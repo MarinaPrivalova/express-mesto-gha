@@ -4,7 +4,6 @@ const User = require('../models/user');
 const { STATUS_CODES } = require('../utils/constants');
 const BadRequestError = require('../utils/errors/BadRequestError');
 const ConflictError = require('../utils/errors/ConflictError');
-const UnauthorizedError = require('../utils/errors/UnauthorizedError');
 const NotFoundError = require('../utils/errors/NotFoundError');
 
 const getUsers = (req, res, next) => {
@@ -43,12 +42,12 @@ const createUser = (req, res, next) => {
       ))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Введены некорректные данные'));
-      } else if (err.code === 11000) {
-        next(new ConflictError('Пользователь с такой почтой уже существует'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Введены некорректные данные'));
       }
+      if (err.code === 11000) {
+        return next(new ConflictError('Пользователь с такой почтой уже существует'));
+      }
+      return next(err);
     });
 };
 
@@ -60,9 +59,7 @@ const login = (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ _id: token });
     })
-    .catch(() => {
-      next(new UnauthorizedError('Неверный логин или пароль'));
-    });
+    .catch((next));
 };
 
 const findCurrentUser = (req, res, next) => {
@@ -87,9 +84,8 @@ const getUserById = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные поиска'));
-      } else {
-        next(err);
       }
+      return next(err);
     });
 };
 
@@ -105,10 +101,9 @@ const updateUserProfile = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Введены некорректные данные при обновлении профиля'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Введены некорректные данные при обновлении профиля'));
       }
+      return next(err);
     });
 };
 
@@ -124,10 +119,9 @@ const updateUserAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Введены некорректные данные при обновлении аватара'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Введены некорректные данные при обновлении аватара'));
       }
+      return next(err);
     });
 };
 
