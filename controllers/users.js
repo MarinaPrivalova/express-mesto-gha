@@ -65,12 +65,18 @@ const login = (req, res, next) => {
 const findCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+      if (user) {
+        res.status(STATUS_CODES.OK).send({ data: user });
+      } else {
+        next(new NotFoundError('Пользователь не найден'));
       }
-      res.status(STATUS_CODES.OK).send({ data: user });
     })
-    .catch((next));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new BadRequestError('Введены некорректные данные поиска'));
+      }
+      return next(err);
+    });
 };
 
 const getUserById = (req, res, next) => {
@@ -83,7 +89,7 @@ const getUserById = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Введены некорректные данные поиска'));
+        return next(new BadRequestError('Введены некорректные данные поиска'));
       }
       return next(err);
     });
